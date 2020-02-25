@@ -1,0 +1,1891 @@
+openapi: 3.0.1
+info:
+  title: 运维管理平台
+  description: 运维平台API.
+  contact:
+    email: souxls@hotmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: http://localhost/v1
+tags:
+- name: application
+  description: application相关的操作
+- name: application group
+  description: 应用组管理
+- name: host
+  description: 主机相关操作
+- name: host group
+  description: 主机组管理
+- name: user
+  description: 关于用户的相关操作
+- name: role
+  description: 关于用户分组
+- name: task
+  description: 关于任务的相关操作
+- name: resource
+  description: 资源管理
+- name: system manage
+- name: command manage
+paths:
+  /app:
+    get:
+      tags:
+      - application
+      summary: 获取应用列表
+      operationId: swagger_server_controllers_application_controller_get_app
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+        401:
+          description: 未授权的访问
+        405:
+          description: 请求的方法不支持
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_controller
+    post:
+      tags:
+      - application
+      summary: 创建一个新的应用
+      operationId: swagger_server_controllers_application_controller_add_app
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/App'
+        required: true
+      responses:
+        201:
+          description: 创建成功
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_controller
+  /app/findByStatus:
+    get:
+      tags:
+      - application
+      summary: 根据状态查找应用
+      description: 可以是用多个状态查询，使用,分割
+      operationId: swagger_server_controllers_application_controller_find_apps_by_status
+      parameters:
+      - name: status
+        in: query
+        description: 从给定的状态里面选择
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            default: 正常
+            enum:
+            - 正常
+            - 新建
+            - 已下线
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/App'
+                x-content-type: application/json
+        404:
+          description: 未识别的状态
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_controller
+  /app/findByTags:
+    get:
+      tags:
+      - application
+      summary: 根据tags查找应用
+      description: 可以使用多个tags查询，使用,分割
+      operationId: swagger_server_controllers_application_controller_find_apps_by_tags
+      parameters:
+      - name: tags
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/App'
+                x-content-type: application/xml
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/App'
+        400:
+          description: 未识别的tag
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_controller
+  /app/{appId}:
+    get:
+      tags:
+      - application
+      summary: 通过appID获取应用信息
+      description: 返回单个应用信息
+      operationId: swagger_server_controllers_application_controller_get_app_by_id
+      parameters:
+      - name: appId
+        in: path
+        description: app的id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+        400:
+          description: 未识别的id
+          content: {}
+        404:
+          description: 应用不存在
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_controller
+    put:
+      tags:
+      - application
+      summary: 更新单个应用
+      operationId: swagger_server_controllers_application_controller_update_app_with_form
+      parameters:
+      - name: appId
+        in: path
+        description: 根据id更新应用
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/App'
+      responses:
+        200:
+          description: 应用更新成功
+          content: {}
+        404:
+          description: 更新的应用不存在
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_controller
+    delete:
+      tags:
+      - application
+      summary: 删除应用
+      operationId: swagger_server_controllers_application_controller_delete_app
+      parameters:
+      - name: appId
+        in: path
+        description: 根据id删除应用
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 删除成功
+        400:
+          description: 不能识别的id
+        404:
+          description: 应用找不到
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_controller
+  /appgroup:
+    get:
+      tags:
+      - application group
+      summary: 获取应用组列表
+      operationId: swagger_server_controllers_application_group_controller_get_app_group
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        201:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_group_controller
+    post:
+      tags:
+      - application group
+      summary: 创建一个新的应用
+      operationId: swagger_server_controllers_application_group_controller_add_app_group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+        required: true
+      responses:
+        201:
+          description: 创建成功
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_group_controller
+  /appgroup/{groupId}:
+    get:
+      tags:
+      - application group
+      summary: 通过appID获取应用组信息
+      description: 可以是用多个状态查询，使用,分割
+      operationId: swagger_server_controllers_application_group_controller_get_app_group_by_id
+      parameters:
+      - name: groupId
+        in: path
+        description: 应用组id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 成功请求
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        400:
+          description: 未识别的id
+        401:
+          description: 未授权的访问
+        404:
+          description: 应用组不存在
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_group_controller
+    put:
+      tags:
+      - application group
+      summary: 更新单个应用
+      operationId: swagger_server_controllers_application_group_controller_update_app_group_with_form
+      parameters:
+      - name: groupId
+        in: path
+        description: 根据id更新应用组
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        200:
+          description: 应用更新成功
+        401:
+          description: 未授权的访问
+        404:
+          description: 更新的应用不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_group_controller
+    delete:
+      tags:
+      - application group
+      summary: 删除应用组
+      operationId: swagger_server_controllers_application_group_controller_delete_app_group
+      parameters:
+      - name: api_key
+        in: header
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: groupId
+        in: path
+        description: 根据groupId删除应用组
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 请求成功
+        400:
+          description: 不能识别的id
+        401:
+          description: 未授权的访问
+        404:
+          description: 应用组找不到
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.application_group_controller
+  /host:
+    get:
+      tags:
+      - host
+      summary: 获取主机列表
+      operationId: swagger_server_controllers_default_controller_get_host
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Host'
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.host_controller
+    post:
+      tags:
+      - host
+      summary: 创建一个新的主机
+      operationId: swagger_server_controllers_default_controller_add_host
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Host'
+        required: true
+      responses:
+        201:
+          description: 创建成功
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.host_controller
+  /host/{hostId}:
+    get:
+      tags:
+      - host
+      summary: 通过hostID获取主机信息
+      description: 返回单个主机信息
+      operationId: swagger_server_controllers_default_controller_get_host_by_id
+      parameters:
+      - name: hostId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Host'
+        400:
+          description: 不能识别的id
+        401:
+          description: 未授权的访问
+        404:
+          description: 主机不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.host_controller
+    put:
+      tags:
+      - host
+      summary: 更新单个主机
+      operationId: swagger_server_controllers_default_controller_update_host_with_form
+      parameters:
+      - name: hostId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Host'
+      responses:
+        200:
+          description: 更新成功
+        401:
+          description: 未授权的访问
+          content: {}
+        404:
+          description: 主机不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.host_controller
+    delete:
+      tags:
+      - host
+      summary: 删除主机
+      operationId: swagger_server_controllers_default_controller_delete_host
+      parameters:
+      - name: api_key
+        in: header
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: hostId
+        in: path
+        description: 根据id删除主机
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 删除成功
+        400:
+          description: 不能识别的id
+        401:
+          description: 未授权访问
+        404:
+          description: 主机找不到
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.host_controller
+  /hostgroup:
+    get:
+      tags:
+      - host group
+      summary: 获取主机组列表
+      operationId: swagger_server_controllers_default_controller_get_host_group
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.host_group_controller
+    post:
+      tags:
+      - host group
+      summary: 创建一个新的主机组
+      operationId: swagger_server_controllers_default_controller_add_host_group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+        required: true
+      responses:
+        201:
+          description: 创建成功
+        401:
+          description: 未授权的访问
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.host_group_controller
+  /hostgroup/{groupId}:
+    get:
+      tags:
+      - host group
+      summary: 通过groupID获取应用组信息
+      description: 可以是用多个状态查询，使用,分割
+      operationId: swagger_server_controllers_default_controller_get_host_group_by_id
+      parameters:
+      - name: groupId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 成功请求
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        400:
+          description: 未识别的id
+        401:
+          description: 未授权的访问
+        404:
+          description: 主机组不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.host_group_controller
+    put:
+      tags:
+      - host group
+      summary: 更新单个应用
+      operationId: swagger_server_controllers_default_controller_update_host_group_with_form
+      parameters:
+      - name: groupId
+        in: path
+        description: 根据id更新主机组
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        200:
+          description: 应用更新成功
+        401:
+          description: 未授权的访问
+        404:
+          description: 更新的应用不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.host_group_controller
+    delete:
+      tags:
+      - host group
+      summary: 删除主机组
+      operationId: swagger_server_controllers_default_controller_delete_host_group
+      parameters:
+      - name: api_key
+        in: header
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: groupId
+        in: path
+        description: 根据groupId删除应用组
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 删除成功
+        400:
+          description: 不能识别的id
+          content: {}
+        404:
+          description: 应用组找不到
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.host_group_controller
+  /user:
+    get:
+      tags:
+      - user
+      summary: 获取用户列表
+      description: 只有有权限的用户可以操作
+      operationId: swagger_server_controllers_default_controller_get_user
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+    post:
+      tags:
+      - user
+      summary: 创建用户
+      description: 只有登录的用户可以操作.
+      operationId: swagger_server_controllers_default_controller_create_user
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        200:
+          description: 创建成功
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /user/login:
+    get:
+      tags:
+      - user
+      summary: 用户登录
+      operationId: swagger_server_controllers_default_controller_login_user
+      parameters:
+      - name: username
+        in: query
+        description: 登录用户名
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: password
+        in: query
+        description: 登录用户密码
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: 请求成功
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              style: simple
+              explode: false
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              style: simple
+              explode: false
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+                x-content-type: application/json
+        400:
+          description: 未识别的用户名/密码
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /user/logout:
+    get:
+      tags:
+      - user
+      summary: 退出登录
+      operationId: swagger_server_controllers_default_controller_logout_user
+      responses:
+        default:
+          description: 请求成功
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /user/{username}:
+    get:
+      tags:
+      - user
+      summary: 通过用户名获取用户信息
+      operationId: swagger_server_controllers_default_controller_get_user_by_name
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        200:
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: 未识别的用户名
+          content: {}
+        404:
+          description: 用户不存在
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+    put:
+      tags:
+      - user
+      summary: 更新用户信息
+      description: 仅对登录的账户.
+      operationId: swagger_server_controllers_default_controller_update_user
+      parameters:
+      - name: username
+        in: path
+        description: 需要更新的用户的用户名
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        200:
+          description: 更新成功
+        400:
+          description: 未识别的用户名
+          content: {}
+        404:
+          description: 用户名不存在
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+    delete:
+      tags:
+      - user
+      summary: 删除用户
+      description: 仅允许已登录用户.
+      operationId: swagger_server_controllers_default_controller_delete_user
+      parameters:
+      - name: username
+        in: path
+        description: 需要被删除的用户的用户名
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        200:
+          description: 请求成功
+        400:
+          description: 未识别的用户名
+          content: {}
+        404:
+          description: 用户不存在
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /role:
+    get:
+      tags:
+      - role
+      summary: 获取角色列表
+      operationId: swagger_server_controllers_default_controller_get_role_by_name
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.role_controller
+    post:
+      tags:
+      - role
+      summary: 创建新的角色
+      operationId: swagger_server_controllers_default_controller_create_role
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Role'
+        required: true
+      responses:
+        201:
+          description: 创建成功
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.role_controller
+  /role/{roleId}:
+    get:
+      tags:
+      - role
+      summary: 通过roleId获取role信息
+      operationId: swagger_server_controllers_default_controller_get_role
+      parameters:
+      - name: roleId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Role'
+        400:
+          description: 不能识别的id
+        401:
+          description: 未授权的访问
+        404:
+          description: 角色不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.role_controller
+    put:
+      tags:
+      - role
+      summary: 更新角色信息
+      operationId: swagger_server_controllers_default_controller_update_role
+      parameters:
+      - name: roleId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Role'
+        required: true
+      responses:
+        200:
+          description: 更新成功
+        401:
+          description: 未授权的访问
+          content: {}
+        404:
+          description: 角色信息不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.role_controller
+    delete:
+      tags:
+      - role
+      summary: 删除角色信息
+      operationId: swagger_server_controllers_default_controller_delete_role
+      parameters:
+      - name: roleId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 请求成功
+        400:
+          description: 不能识别的id
+        401:
+          description: 未授权的访问
+        404:
+          description: 角色不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.role_controller
+  /task:
+    get:
+      tags:
+      - task
+      summary: 获取任务列表
+      operationId: swagger_server_controllers_default_controller_get_task
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.task_controller
+    post:
+      tags:
+      - task
+      summary: 新建任务
+      operationId: swagger_server_controllers_default_controller_create_task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+        required: true
+      responses:
+        201:
+          description: 创建成功
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.task_controller
+  /task/{taskId}:
+    get:
+      tags:
+      - task
+      summary: 根据taskId获取任务信息
+      operationId: swagger_server_controllers_default_controller_get_task_by_id
+      parameters:
+      - name: taskId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        400:
+          description: 不能识别的id
+        401:
+          description: 未授权的访问
+        404:
+          description: 请求的任务不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.task_controller
+    put:
+      tags:
+      - task
+      summary: 更新任务
+      operationId: swagger_server_controllers_default_controller_update_task
+      parameters:
+      - name: taskId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+        required: true
+      responses:
+        200:
+          description: 更新成功
+        401:
+          description: 未授权的访问
+          content: {}
+        404:
+          description: 请求的任务不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.task_controller
+    delete:
+      tags:
+      - task
+      summary: 删除角色信息
+      operationId: swagger_server_controllers_default_controller_delete_task
+      parameters:
+      - name: taskId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 删除成功
+        400:
+          description: 不能识别的id
+        404:
+          description: 请求的任务不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.task_controller
+  /resource:
+    get:
+      tags:
+      - resource
+      summary: 获取资源列表
+      operationId: swagger_server_controllers_default_controller_get_resource
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.resource_controller
+    post:
+      tags:
+      - resource
+      summary: 创建资源池
+      operationId: swagger_server_controllers_default_controller_create_resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Resource'
+        required: true
+      responses:
+        201:
+          description: 创建成功
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.resource_controller
+  /resource/{resourceId}:
+    get:
+      tags:
+      - resource
+      summary: 获取资源详细信息
+      operationId: swagger_server_controllers_default_controller_get_resource_by_id
+      parameters:
+      - name: resourceId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
+        400:
+          description: 不能识别的id
+        401:
+          description: 未授权的访问
+        404:
+          description: 请求的资源不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.resource_controller
+    put:
+      tags:
+      - resource
+      summary: 更新资源信息
+      operationId: swagger_server_controllers_default_controller_update_resource
+      parameters:
+      - name: resourceId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Resource'
+      responses:
+        200:
+          description: 更新成功
+        400:
+          description: 不能识别的id
+        401:
+          description: 未授权的访问
+          content: {}
+        404:
+          description: 请求的资源不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.resource_controller
+    delete:
+      tags:
+      - resource
+      summary: 删除资源
+      operationId: swagger_server_controllers_default_controller_delete_resource
+      parameters:
+      - name: resourceId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 删除成功
+        400:
+          description: 不能识别的id
+        401:
+          description: 未授权的访问
+        404:
+          description: 请求的资源不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.resource_controller
+  /log:
+    get:
+      tags:
+      - system manage
+      summary: 获取操作日志
+      operationId: swagger_server_controllers_default_controller_get_log
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Log'
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.system_manage_controller
+  /command:
+    get:
+      tags:
+      - command manage
+      summary: 获取命令列表
+      operationId: swagger_server_controllers_default_controller_get_command
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+        401:
+          description: 未授权的访问
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.command_manage_controller
+    post:
+      tags:
+      - command manage
+      summary: 创建命令
+      operationId: swagger_server_controllers_default_controller_create_command
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Command'
+        required: true
+      responses:
+        201:
+          description: 创建成功
+        401:
+          description: 未授权的访问
+          content: {}
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.command_manage_controller
+  /command/{commandId}:
+    get:
+      tags:
+      - command manage
+      summary: 通过命令Id获取命令详细信息
+      operationId: swagger_server_controllers_default_controller_get_command_by_id
+      parameters:
+      - name: commandId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 请求成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
+        400:
+          description: 不能识别的id
+        401:
+          description: 未授权的访问
+        404:
+          description: 请求的命令不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.command_manage_controller
+    put:
+      tags:
+      - command manage
+      summary: 更新命令
+      operationId: swagger_server_controllers_default_controller_update_command
+      parameters:
+      - name: commandId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Command'
+      responses:
+        200:
+          description: 更新成功
+        401:
+          description: 未授权的访问
+          content: {}
+        404:
+          description: 请求的命令不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.command_manage_controller
+    delete:
+      tags:
+      - command manage
+      summary: 删除命令
+      operationId: swagger_server_controllers_default_controller_delete_command
+      parameters:
+      - name: api_key
+        in: header
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: commandId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: 删除成功
+        400:
+          description: 不能识别的id
+        401:
+          description: 未授权的访问
+        404:
+          description: 请求的命令不存在
+      security:
+      - oauth2: []
+      x-openapi-router-controller: swagger_server.controllers.command_manage_controller
+components:
+  schemas:
+    App:
+      type: object
+      properties:
+        id:
+          type: integer
+        appId:
+          type: integer
+        appName:
+          type: string
+        nickName:
+          type: string
+        description:
+          type: string
+        domain:
+          type: string
+        repo:
+          type: string
+          format: uri
+        appType:
+          type: string
+        createDate:
+          type: string
+          format: date
+        status:
+          type: string
+        owner:
+          type: string
+      example:
+        owner: owner
+        appName: appName
+        nickName: nickName
+        appType: appType
+        appId: 6
+        domain: domain
+        repo: http://example.com/aeiou
+        description: description
+        id: 0
+        createDate: 2000-01-23
+        status: status
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        groupname:
+          type: string
+        cname:
+          type: string
+        description:
+          type: string
+        createdate:
+          type: string
+          format: date-time
+        status:
+          type: string
+        owner:
+          type: string
+      example:
+        owner: owner
+        cname: cname
+        description: description
+        createdate: 2000-01-23T04:56:07.000+00:00
+        id: 0
+        groupname: groupname
+        status: status
+    Host:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        hostname:
+          type: string
+          format: hostname
+        description:
+          type: string
+        wanip:
+          type: string
+          format: ipv4
+        lanip:
+          type: string
+          format: ipv4
+        idracip:
+          type: string
+          format: ipv4
+        disk:
+          type: string
+        memory:
+          type: string
+        systemtype:
+          type: string
+        hosttype:
+          type: string
+        status:
+          type: string
+        productname:
+          type: string
+        sn:
+          type: string
+        raid:
+          type: string
+        idc:
+          type: string
+        cabinet:
+          type: string
+        owner:
+          type: string
+        expired:
+          type: string
+          format: date
+      example:
+        owner: owner
+        memory: memory
+        idracip: idracip
+        hosttype: hosttype
+        description: description
+        systemtype: systemtype
+        idc: idc
+        wanip: wanip
+        hostname: hostname
+        disk: disk
+        expired: 2000-01-23
+        productname: productname
+        id: 0
+        sn: sn
+        cabinet: cabinet
+        lanip: lanip
+        status: status
+        raid: raid
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        account:
+          type: string
+        department:
+          type: string
+        email:
+          type: string
+        job:
+          type: string
+        phone:
+          type: string
+        status:
+          type: integer
+          description: 用户状态
+          format: int32
+        createdate:
+          type: string
+          format: date-time
+        rolename:
+          type: string
+      example:
+        phone: phone
+        rolename: rolename
+        createdate: 2000-01-23T04:56:07.000+00:00
+        id: 0
+        department: department
+        job: job
+        account: account
+        email: email
+        username: username
+        status: 6
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        rolename:
+          type: string
+        cname:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        owner:
+          type: string
+      example:
+        owner: owner
+        rolename: rolename
+        cname: cname
+        description: description
+        id: 0
+        status: status
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        taskname:
+          type: string
+        description:
+          type: string
+        tasktype:
+          type: string
+        createdate:
+          type: string
+          format: date-time
+        status:
+          type: string
+        owner:
+          type: string
+      example:
+        owner: owner
+        tasktype: tasktype
+        taskname: taskname
+        description: description
+        createdate: 2000-01-23T04:56:07.000+00:00
+        id: 0
+        status: status
+    Resource:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        hostname:
+          type: string
+          format: hostname
+        lanip:
+          type: string
+          format: ipv4
+        version:
+          type: string
+        port:
+          type: integer
+          format: int64
+        status:
+          type: string
+        note:
+          type: string
+      example:
+        note: note
+        hostname: hostname
+        port: 6
+        id: 0
+        version: version
+        lanip: lanip
+        status: status
+    Log:
+      type: object
+      properties:
+        time:
+          type: string
+          format: date-time
+        user:
+          type: string
+        nickname:
+          type: string
+        logtype:
+          type: string
+        message:
+          type: string
+        ip:
+          type: string
+          format: ipv4
+      example:
+        logtype: logtype
+        ip: ip
+        nickname: nickname
+        time: 2000-01-23T04:56:07.000+00:00
+        message: message
+        user: user
+    Command:
+      type: object
+      properties:
+        id:
+          type: string
+          format: int64
+        cmdname:
+          type: string
+        description:
+          type: string
+        cmdtype:
+          type: string
+        supporttype:
+          type: string
+        version:
+          type: string
+        cmdpath:
+          type: string
+      example:
+        cmdpath: cmdpath
+        cmdtype: cmdtype
+        cmdname: cmdname
+        description: description
+        id: id
+        version: version
+        supporttype: supporttype
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: https://localhost/oauth2/token
+          scopes: {}
+        clientCredentials:
+          tokenUrl: http://petstore.swagger.io/oauth/dialog
+          scopes: {}
+      x-tokenInfoFunc: swagger_server.controllers.authorization_controller.check_oauth2
+      x-scopeValidateFunc: swagger_server.controllers.authorization_controller.validate_scope_oauth2
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+      x-apikeyInfoFunc: swagger_server.controllers.authorization_controller.check_api_key
+    openId:
+      type: openIdConnect
+      openIdConnectUrl: http://localhost/openid
+
